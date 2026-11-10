@@ -11,9 +11,10 @@
     ],
   },
   "files": [
+    { "kind": "folder", "path": "HelloWorldBridge1", "target-membership": [ "HelloWorldBridge1" ] },
     { "path": "Colors.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
     { "path": "OnboardingView.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
-    { "kind": "folder", "path": "HelloWorldBridge1", "target-membership": [ "HelloWorldBridge1" ] },
+    { "path": "ActivityView.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
     {
       "kind": "group",
       "name": "Products",
