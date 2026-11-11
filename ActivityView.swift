@@ -1,12 +1,19 @@
 import SwiftUI
 
 struct ActivityView: View {
+    @State private var learnedDays = 4
+    @State private var freezedDays = 0
+    @State private var isLoggedToday = false
+    
     let letters = ["S", "M", "T", "W", "T", "F", "S"]
 
     func dayLetter(for day: Int) -> String {
         letters[day - 20]
     }
-
+    
+    func daysText(_ count: Int) -> String {        count == 1 ? "\(count) day" : "\(count) days"
+    }
+    
     var body: some View {
         ZStack {
             Color.black
@@ -59,7 +66,7 @@ struct ActivityView: View {
                     VStack(spacing: 4) {
                         Image(systemName: "flame.fill")
                             .foregroundStyle(Color.appOrange)
-                        Text("4 days")
+                        Text(daysText(learnedDays))
                             .font(.system(size: 17, weight: .semibold))
                             .foregroundStyle(.white)
                         Text("Learned")
@@ -74,8 +81,7 @@ struct ActivityView: View {
                     VStack(spacing: 4) {
                         Image(systemName: "snowflake")
                             .foregroundStyle(Color.appCyan)
-                        Text("0 days")
-                            .font(.system(size: 17, weight: .semibold))
+                        Text(daysText(freezedDays))                            .font(.system(size: 17, weight: .semibold))
                             .foregroundStyle(.white)
                         Text("Freezed")
                             .font(.system(size: 12))
@@ -91,16 +97,22 @@ struct ActivityView: View {
                 Spacer()
 
                 Button {
-                    // لاحقاً: نسجل اليوم كمتعلَّم
+                    if !isLoggedToday {
+                        learnedDays += 1
+                        isLoggedToday = true
+                    }
                 } label: {
-                    Text("Log as Learned")
+                    Text(isLoggedToday ? "Logged as learned" : "Log as Learned")
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(isLoggedToday ? Color.appGray : Color.white)
                         .frame(width: 272, height: 272)
-                        .background(Color.appOrange)
+                        .background(isLoggedToday ? Color.appCard : Color.appOrange)
                         .clipShape(Circle())
                 }
+                .disabled(isLoggedToday)
                 .frame(maxWidth: .infinity)
+                
+                
 
                 Spacer()
 
