@@ -4,16 +4,24 @@ struct ActivityView: View {
     @State private var learnedDays = 4
     @State private var freezedDays = 0
     @State private var isLoggedToday = false
-    
+    @State private var isFreezedToday = false
+    @State private var usedFreezes = 0
+    let maxFreezes = 2
+
     let letters = ["S", "M", "T", "W", "T", "F", "S"]
 
     func dayLetter(for day: Int) -> String {
         letters[day - 20]
     }
-    
-    func daysText(_ count: Int) -> String {        count == 1 ? "\(count) day" : "\(count) days"
+
+    func daysText(_ count: Int) -> String {
+        count == 1 ? "\(count) day" : "\(count) days"
     }
-    
+
+    var isFreezeDisabled: Bool {
+        isFreezedToday || isLoggedToday || usedFreezes >= maxFreezes
+    }
+
     var body: some View {
         ZStack {
             Color.black
@@ -81,7 +89,8 @@ struct ActivityView: View {
                     VStack(spacing: 4) {
                         Image(systemName: "snowflake")
                             .foregroundStyle(Color.appCyan)
-                        Text(daysText(freezedDays))                            .font(.system(size: 17, weight: .semibold))
+                        Text(daysText(freezedDays))
+                            .font(.system(size: 17, weight: .semibold))
                             .foregroundStyle(.white)
                         Text("Freezed")
                             .font(.system(size: 12))
@@ -102,7 +111,7 @@ struct ActivityView: View {
                         isLoggedToday = true
                     }
                 } label: {
-                    Text(isLoggedToday ? "Logged as learned" : "Log as Learned")
+                    Text(isLoggedToday ? "Logged as Learned" : "Log as Learned")
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundStyle(isLoggedToday ? Color.appGray : Color.white)
                         .frame(width: 272, height: 272)
@@ -111,24 +120,27 @@ struct ActivityView: View {
                 }
                 .disabled(isLoggedToday)
                 .frame(maxWidth: .infinity)
-                
-                
 
                 Spacer()
 
                 Button {
-                    // لاحقاً: نجمّد اليوم
+                    if !isFreezeDisabled {
+                        freezedDays += 1
+                        usedFreezes += 1
+                        isFreezedToday = true
+                    }
                 } label: {
-                    Text("Freeze for a day")
+                    Text(isFreezedToday ? "Freezed for a day" : "Freeze for a day")
                         .font(.system(size: 17))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(isFreezeDisabled ? Color.appGray : Color.white)
                         .frame(width: 272, height: 48)
-                        .background(Color.appCyan)
+                        .background(isFreezeDisabled ? Color.appCard : Color.appCyan)
                         .clipShape(Capsule())
                 }
+                .disabled(isFreezeDisabled)
                 .frame(maxWidth: .infinity)
 
-                Text("0 out of 2 Freezes used")
+                Text("\(usedFreezes) out of \(maxFreezes) Freezes used")
                     .font(.system(size: 12))
                     .foregroundStyle(Color.appGray)
                     .frame(maxWidth: .infinity)
