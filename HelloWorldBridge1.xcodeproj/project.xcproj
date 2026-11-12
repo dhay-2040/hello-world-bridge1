@@ -15,6 +15,7 @@
     { "path": "Colors.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
     { "path": "OnboardingView.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
     { "path": "ActivityView.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
+    { "path": "ActivityViewModel.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
     {
       "kind": "group",
       "name": "Products",

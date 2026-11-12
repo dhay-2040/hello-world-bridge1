@@ -1,25 +1,12 @@
 import SwiftUI
 
 struct ActivityView: View {
-    @State private var learnedDays = 4
-    @State private var freezedDays = 0
-    @State private var isLoggedToday = false
-    @State private var isFreezedToday = false
-    @State private var usedFreezes = 0
-    let maxFreezes = 2
+    @StateObject private var viewModel = ActivityViewModel()
 
     let letters = ["S", "M", "T", "W", "T", "F", "S"]
 
     func dayLetter(for day: Int) -> String {
         letters[day - 20]
-    }
-
-    func daysText(_ count: Int) -> String {
-        count == 1 ? "\(count) day" : "\(count) days"
-    }
-
-    var isFreezeDisabled: Bool {
-        isFreezedToday || isLoggedToday || usedFreezes >= maxFreezes
     }
 
     var body: some View {
@@ -74,7 +61,7 @@ struct ActivityView: View {
                     VStack(spacing: 4) {
                         Image(systemName: "flame.fill")
                             .foregroundStyle(Color.appOrange)
-                        Text(daysText(learnedDays))
+                        Text(viewModel.daysText(viewModel.learnedDays))
                             .font(.system(size: 17, weight: .semibold))
                             .foregroundStyle(.white)
                         Text("Learned")
@@ -89,7 +76,7 @@ struct ActivityView: View {
                     VStack(spacing: 4) {
                         Image(systemName: "snowflake")
                             .foregroundStyle(Color.appCyan)
-                        Text(daysText(freezedDays))
+                        Text(viewModel.daysText(viewModel.freezedDays))
                             .font(.system(size: 17, weight: .semibold))
                             .foregroundStyle(.white)
                         Text("Freezed")
@@ -106,41 +93,31 @@ struct ActivityView: View {
                 Spacer()
 
                 Button {
-                    if !isLoggedToday {
-                        learnedDays += 1
-                        isLoggedToday = true
-                    }
+                    viewModel.logLearned()
                 } label: {
-                    Text(isLoggedToday ? "Logged as Learned" : "Log as Learned")
+                    Text(viewModel.isLoggedToday ? "Logged as Learned" : "Log as Learned")
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(isLoggedToday ? Color.appGray : Color.white)
+                        .foregroundStyle(viewModel.isLoggedToday ? Color.appGray : Color.white)
                         .frame(width: 272, height: 272)
-                        .background(isLoggedToday ? Color.appCard : Color.appOrange)
+                        .background(viewModel.isLoggedToday ? Color.appCard : Color.appOrange)
                         .clipShape(Circle())
                 }
-                .disabled(isLoggedToday)
+                .disabled(viewModel.isLoggedToday)
                 .frame(maxWidth: .infinity)
 
                 Spacer()
 
                 Button {
-                    if !isFreezeDisabled {
-                        freezedDays += 1
-                        usedFreezes += 1
-                        isFreezedToday = true
-                    }
-                } label: {
-                    Text(isFreezedToday ? "Freezed for a day" : "Freeze for a day")
-                        .font(.system(size: 17))
-                        .foregroundStyle(isFreezeDisabled ? Color.appGray : Color.white)
-                        .frame(width: 272, height: 48)
-                        .background(isFreezeDisabled ? Color.appCard : Color.appCyan)
+                    viewModel.freezeDay()
+                } label: {                    Text(viewModel.isFreezedToday ? "Freezed for a day" : "Freeze for a day")
+                    .foregroundStyle(viewModel.isFreezeDisabled ? Color.appGray : Color.white)
+                    .background(viewModel.isFreezeDisabled ? Color.appCard : Color.appCyan)
                         .clipShape(Capsule())
                 }
-                .disabled(isFreezeDisabled)
+                .disabled(viewModel.isFreezeDisabled)
                 .frame(maxWidth: .infinity)
 
-                Text("\(usedFreezes) out of \(maxFreezes) Freezes used")
+        Text("\(viewModel.usedFreezes) out of \(viewModel.maxFreezes) Freezes used")
                     .font(.system(size: 12))
                     .foregroundStyle(Color.appGray)
                     .frame(maxWidth: .infinity)
