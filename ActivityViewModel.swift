@@ -8,6 +8,14 @@ class ActivityViewModel: ObservableObject {
     @Published var isFreezedToday = false
     @Published var usedFreezes = 0
     let maxFreezes = 2
+    enum GoalState {
+        case inProgress
+        case completed
+        case notMet
+    }
+
+    @Published var goalState: GoalState = .inProgress
+    @Published var freezedDates: Set<Int> = []
     
     func daysText(_ count: Int) -> String {
         count == 1 ? "\(count) day" : "\(count) days"
@@ -29,11 +37,13 @@ class ActivityViewModel: ObservableObject {
             freezedDays += 1
             usedFreezes += 1
             isFreezedToday = true
+            freezedDates.insert(24)
         }
     }
     func dayColor(for day: Int) -> Color {
-        if day == 24 && isFreezedToday { return Color.appCyan }
+        if freezedDates.contains(day) { return Color.appCyan.opacity(day == 24 ? 1 : 0.25) }
         if day == 24 { return Color.appOrange }
         return day < 24 ? Color.appOrange.opacity(0.2) : Color.clear
     }
-}
+    }
+
