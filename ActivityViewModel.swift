@@ -31,4 +31,9 @@ class ActivityViewModel: ObservableObject {
             isFreezedToday = true
         }
     }
+    func dayColor(for day: Int) -> Color {
+        if day == 24 && isFreezedToday { return Color.appCyan }
+        if day == 24 { return Color.appOrange }
+        return day < 24 ? Color.appOrange.opacity(0.2) : Color.clear
+    }
 }
