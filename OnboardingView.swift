@@ -1,22 +1,27 @@
 import SwiftUI
 
-
-
-
 struct OnboardingView: View {
+    @ObservedObject var viewModel: ActivityViewModel
+    var onStart: () -> Void
+
     @State private var learningText = ""
     @State private var selectedDuration = "Week"
+
+    var canStart: Bool {
+        !learningText.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
     var body: some View {
-        ZStack{
+        ZStack {
             Color.black
                 .ignoresSafeArea()
+
             VStack(alignment: .leading, spacing: 4) {
                 Image(systemName: "flame.fill")
                     .font(.system(size: 40))
                     .foregroundStyle(Color.appOrange)
                     .padding(.bottom, 40)
-                
-                
+
                 HStack(spacing: 0) {
                     Text("Hello ")
                         .font(.system(size: 34))
@@ -24,23 +29,25 @@ struct OnboardingView: View {
                         .font(.system(size: 34, weight: .bold))
                 }
                 .foregroundStyle(.white)
-                
+
                 Text("This app will help you learn everyday!")
                     .font(.system(size: 17))
                     .foregroundStyle(Color.gray)
+
                 Text("I want to learn")
                     .font(.system(size: 17))
                     .foregroundStyle(.white)
                     .padding(.top, 40)
-                
+
                 TextField("", text: $learningText, prompt: Text("Swift").foregroundStyle(Color.gray))
                     .font(.system(size: 17))
                     .foregroundStyle(.white)
                     .padding(.vertical, 8)
-                
+
                 Rectangle()
                     .fill(Color.gray.opacity(0.4))
                     .frame(height: 1)
+
                 Text("I want to learn it in a")
                     .font(.system(size: 17))
                     .foregroundStyle(.white)
@@ -62,10 +69,15 @@ struct OnboardingView: View {
                     }
                 }
                 .padding(.top, 8)
+
                 Spacer()
 
                 Button {
-                    // لاحقاً: ننتقل لشاشة Activity
+                    viewModel.updateGoal(
+                        text: learningText.trimmingCharacters(in: .whitespaces),
+                        duration: selectedDuration
+                    )
+                    onStart()
                 } label: {
                     Text("Start Learning")
                         .font(.system(size: 17, weight: .semibold))
@@ -75,6 +87,8 @@ struct OnboardingView: View {
                         .background(Color.appOrange)
                         .clipShape(Capsule())
                 }
+                .disabled(!canStart)
+                .opacity(canStart ? 1 : 0.5)
                 .frame(maxWidth: .infinity)
 
                 Text("You can edit your desire later")
@@ -88,6 +102,7 @@ struct OnboardingView: View {
         }
     }
 }
+
 #Preview {
-    OnboardingView()
+    OnboardingView(viewModel: ActivityViewModel(), onStart: {})
 }

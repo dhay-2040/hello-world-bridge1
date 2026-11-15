@@ -2,79 +2,99 @@ import SwiftUI
 import Combine
 
 class ActivityViewModel: ObservableObject {
-    @Published var learnedDays = 4
+    @Published var learnedDays = 0
     @Published var freezedDays = 0
     @Published var loggedDates: Set<Date> = []
     @Published var freezedDates: Set<Date> = []
     @Published var usedFreezes = 0
-    @Published var lastLoggedDate: Date? = nil
-
+    @Published var lastActivityDate: Date? = nil
     @Published var selectedDuration = "Week"
     @Published var learningText = "Swift"
     @Published var goalStartDate = Calendar.current.startOfDay(for: Date())
 
+    enum GoalState { case inProgress, completed, notMet }
+    @Published var goalState: GoalState = .inProgress
+
     var today: Date { Calendar.current.startOfDay(for: Date()) }
 
     var todayText: String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US")
-        formatter.dateFormat = "EEEE, d MMMM"
-        return formatter.string(from: Date())
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US")
+        f.dateFormat = "EEEE, d MMMM"
+        return f.string(from: Date())
     }
 
     var weekDays: [Date] {
-        let calendar = Calendar.current
-        let weekday = calendar.component(.weekday, from: today) // 1 = الأحد
-        return (0..<7).compactMap {
-            calendar.date(byAdding: .day, value: $0 - (weekday - 1), to: today)
-        }
+        let cal = Calendar.current
+        let offset = cal.component(.weekday, from: today) - 1
+        let sunday = cal.date(byAdding: .day, value: -offset, to: today)!
+        return (0..<7).map { cal.date(byAdding: .day, value: $0, to: sunday)! }
     }
 
     var isLoggedToday: Bool { loggedDates.contains(today) }
-
     var isFreezedToday: Bool { freezedDates.contains(today) }
-
-    var isLogDisabled: Bool { isLoggedToday || isFreezedToday }
+    var isLogDisabled: Bool { isLoggedToday }
 
     var maxFreezes: Int {
         switch selectedDuration {
         case "Week": return 2
         case "Month": return 8
-        case "Year": return 96
-        default: return 2
+        default: return 96
         }
     }
 
-    enum GoalState {
-        case inProgress
-        case completed
-        case notMet
-    }
-
-    @Published var goalState: GoalState = .inProgress
-
-    func daysText(_ count: Int) -> String {
-        count == 1 ? "\(count) day" : "\(count) days"
+    var goalDays: Int {
+        switch selectedDuration {
+        case "Week": return 7
+        case "Month": return 30
+        default: return 365
+        }
     }
 
     var isFreezeDisabled: Bool {
         isFreezedToday || isLoggedToday || usedFreezes >= maxFreezes
     }
 
+    func daysText(_ count: Int) -> String {
+        count == 1 ? "\(count) day" : "\(count) days"
+    }
+
     func logLearned() {
-        if !isLogDisabled {
-            learnedDays += 1
-            loggedDates.insert(today)
-            lastLoggedDate = Date()
+        guard !isLogDisabled else { return }
+        learnedDays += 1
+        loggedDates.insert(today)
+        lastActivityDate = Date()
+    }
+
+    func freezeDay() {
+        guard !isFreezeDisabled else { return }
+        freezedDays += 1
+        usedFreezes += 1
+        freezedDates.insert(today)
+        lastActivityDate = Date()
+    }
+
+    func checkGoal() {
+        guard goalState == .inProgress else { return }
+        let cal = Calendar.current
+        let elapsed = cal.dateComponents([.day], from: goalStartDate, to: today).day ?? 0
+        guard elapsed >= goalDays else { return }
+
+        var allCovered = true
+        for i in 0..<goalDays {
+            let day = cal.date(byAdding: .day, value: i, to: goalStartDate)!
+            if !loggedDates.contains(day) && !freezedDates.contains(day) {
+                allCovered = false
+                break
+            }
         }
+        goalState = allCovered ? .completed : .notMet
     }
 
     func checkStreak() {
-        guard let last = lastLoggedDate else { return }
-
-        let hours = Date().timeIntervalSince(last) / 3600
-
-        if hours > 32 {
+        checkGoal()
+        if let last = lastActivityDate,
+           Date().timeIntervalSince(last) > 32 * 3600 {
             learnedDays = 0
         }
     }
@@ -87,37 +107,31 @@ class ActivityViewModel: ObservableObject {
         usedFreezes = 0
         loggedDates = []
         freezedDates = []
-        lastLoggedDate = nil
-        goalStartDate = today 
+        lastActivityDate = nil
+        goalStartDate = today
         goalState = .inProgress
     }
 
-    func freezeDay() {
-        if !isFreezeDisabled {
-            freezedDays += 1
-            usedFreezes += 1
-            freezedDates.insert(today)
+    // Demo only: long-press on the "Activity" title to preview each goal state
+    func cycleDemoState() {
+        switch goalState {
+        case .inProgress: goalState = .completed
+        case .completed: goalState = .notMet
+        case .notMet: goalState = .inProgress
         }
     }
 
-    // لون خلفية دائرة اليوم
     func dayColor(for date: Date) -> Color {
-        if freezedDates.contains(date) {
-            return Color.appCyan.opacity(0.25)
-        }
-        if date == today {
-            return Color.appOrange
-        }
-        return date < today ? Color.appOrange.opacity(0.2) : Color.clear
+        if freezedDates.contains(date) { return Color.appCyan.opacity(0.25) }
+        if date == today { return Color.appOrange }
+        if loggedDates.contains(date) { return Color.appOrange.opacity(0.2) }
+        return .clear
     }
 
     func dayTextColor(for date: Date) -> Color {
-        if freezedDates.contains(date) {
-            return Color.appCyan
-        }
-        if date == today {
-            return Color.white
-        }
-        return date < today ? Color.appOrange : Color.white
+        if freezedDates.contains(date) { return Color.appCyan }
+        if date == today { return .white }
+        if loggedDates.contains(date) { return Color.appOrange }
+        return .white
     }
 }

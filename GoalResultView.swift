@@ -16,7 +16,7 @@ enum GoalStatus {
     var title: String {
         switch self {
         case .completed:
-            return "Well done!"
+            return "Will done!"
         case .failed:
             return "You didn't reach your goal this time."
         }
