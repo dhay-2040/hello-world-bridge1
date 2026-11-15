@@ -19,6 +19,7 @@
     { "path": "GoalResultView.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
     { "path": "GoalFormView.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
     { "path": "LearningGoalView.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
+    { "path": "CalendarView.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
     {
       "kind": "group",
       "name": "Products",

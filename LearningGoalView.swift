@@ -14,7 +14,6 @@ struct LearningGoalView: View {
         _selectedDuration = State(initialValue: viewModel.selectedDuration)
     }
 
-    // يتفعل ✓ فقط إذا النص مو فاضي وفيه تغيير فعلي
     var canUpdate: Bool {
         let text = learningText.trimmingCharacters(in: .whitespaces)
         let changed = text != viewModel.learningText || selectedDuration != viewModel.selectedDuration

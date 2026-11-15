@@ -3,6 +3,7 @@ import SwiftUI
 struct ActivityView: View {
     @StateObject private var viewModel = ActivityViewModel()
     @State private var showGoalScreen = false
+    @State private var showCalendar = false
 
     let letters = ["S", "M", "T", "W", "T", "F", "S"]
 
@@ -19,11 +20,15 @@ struct ActivityView: View {
 
                     Spacer()
 
-                    Image(systemName: "calendar")
-                        .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .background(Color.white.opacity(0.12))
-                        .clipShape(Circle())
+                    Button {
+                        showCalendar = true
+                    } label: {
+                        Image(systemName: "calendar")
+                            .foregroundStyle(.white)
+                            .frame(width: 44, height: 44)
+                            .background(Color.white.opacity(0.12))
+                            .clipShape(Circle())
+                    }
 
                     Button {
                         showGoalScreen = true
@@ -147,6 +152,9 @@ struct ActivityView: View {
             NavigationStack {
                 LearningGoalView(viewModel: viewModel)
             }
+        }
+        .sheet(isPresented: $showCalendar) {
+            CalendarView(viewModel: viewModel)
         }
     }
 }

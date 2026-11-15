@@ -11,6 +11,7 @@ class ActivityViewModel: ObservableObject {
 
     @Published var selectedDuration = "Week"
     @Published var learningText = "Swift"
+    @Published var goalStartDate = Calendar.current.startOfDay(for: Date())
 
     var today: Date { Calendar.current.startOfDay(for: Date()) }
 
@@ -21,7 +22,6 @@ class ActivityViewModel: ObservableObject {
         return formatter.string(from: Date())
     }
 
-    // أيام الأسبوع الحالي من الأحد إلى السبت
     var weekDays: [Date] {
         let calendar = Calendar.current
         let weekday = calendar.component(.weekday, from: today) // 1 = الأحد
@@ -51,7 +51,6 @@ class ActivityViewModel: ObservableObject {
         case notMet
     }
 
-    // غيّرها للاختبار: .inProgress أو .completed أو .notMet
     @Published var goalState: GoalState = .inProgress
 
     func daysText(_ count: Int) -> String {
@@ -89,6 +88,7 @@ class ActivityViewModel: ObservableObject {
         loggedDates = []
         freezedDates = []
         lastLoggedDate = nil
+        goalStartDate = today 
         goalState = .inProgress
     }
 
@@ -108,11 +108,9 @@ class ActivityViewModel: ObservableObject {
         if date == today {
             return Color.appOrange
         }
-        // مؤقت: الأيام الماضية برتقالية حتى نضيف الحفظ
         return date < today ? Color.appOrange.opacity(0.2) : Color.clear
     }
 
-    // لون رقم اليوم
     func dayTextColor(for date: Date) -> Color {
         if freezedDates.contains(date) {
             return Color.appCyan
