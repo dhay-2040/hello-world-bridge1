@@ -4,9 +4,22 @@ struct LearningGoalView: View {
     @ObservedObject var viewModel: ActivityViewModel
     @Environment(\.dismiss) private var dismiss
 
-    @State private var learningText = "Swift"
-    @State private var selectedDuration = "Week"
+    @State private var learningText: String
+    @State private var selectedDuration: String
     @State private var showAlert = false
+
+    init(viewModel: ActivityViewModel) {
+        self.viewModel = viewModel
+        _learningText = State(initialValue: viewModel.learningText)
+        _selectedDuration = State(initialValue: viewModel.selectedDuration)
+    }
+
+    // يتفعل ✓ فقط إذا النص مو فاضي وفيه تغيير فعلي
+    var canUpdate: Bool {
+        let text = learningText.trimmingCharacters(in: .whitespaces)
+        let changed = text != viewModel.learningText || selectedDuration != viewModel.selectedDuration
+        return !text.isEmpty && changed
+    }
 
     var body: some View {
         ZStack {
@@ -38,11 +51,12 @@ struct LearningGoalView: View {
                         } label: {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 17, weight: .semibold))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(canUpdate ? Color.white : Color.appGray)
                                 .frame(width: 44, height: 44)
-                                .background(Color.appOrange)
+                                .background(canUpdate ? Color.appOrange : Color.white.opacity(0.12))
                                 .clipShape(Circle())
                         }
+                        .disabled(!canUpdate)
                     }
                 }
                 .padding(.top, 8)
