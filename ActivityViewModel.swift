@@ -4,47 +4,122 @@ import Combine
 class ActivityViewModel: ObservableObject {
     @Published var learnedDays = 4
     @Published var freezedDays = 0
-    @Published var isLoggedToday = false
-    @Published var isFreezedToday = false
+    @Published var loggedDates: Set<Date> = []
+    @Published var freezedDates: Set<Date> = []
     @Published var usedFreezes = 0
+    @Published var lastLoggedDate: Date? = nil
 
-    let maxFreezes = 2
+    @Published var selectedDuration = "Week"
+    @Published var learningText = "Swift"
+
+    var today: Date { Calendar.current.startOfDay(for: Date()) }
+
+    var todayText: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.dateFormat = "EEEE, d MMMM"
+        return formatter.string(from: Date())
+    }
+
+    // أيام الأسبوع الحالي من الأحد إلى السبت
+    var weekDays: [Date] {
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: today) // 1 = الأحد
+        return (0..<7).compactMap {
+            calendar.date(byAdding: .day, value: $0 - (weekday - 1), to: today)
+        }
+    }
+
+    var isLoggedToday: Bool { loggedDates.contains(today) }
+
+    var isFreezedToday: Bool { freezedDates.contains(today) }
+
+    var isLogDisabled: Bool { isLoggedToday || isFreezedToday }
+
+    var maxFreezes: Int {
+        switch selectedDuration {
+        case "Week": return 2
+        case "Month": return 8
+        case "Year": return 96
+        default: return 2
+        }
+    }
+
     enum GoalState {
         case inProgress
         case completed
         case notMet
     }
 
+    // غيّرها للاختبار: .inProgress أو .completed أو .notMet
     @Published var goalState: GoalState = .inProgress
-    @Published var freezedDates: Set<Int> = []
-    
+
     func daysText(_ count: Int) -> String {
         count == 1 ? "\(count) day" : "\(count) days"
     }
-    
+
     var isFreezeDisabled: Bool {
         isFreezedToday || isLoggedToday || usedFreezes >= maxFreezes
     }
-    
+
     func logLearned() {
-        if !isLoggedToday {
+        if !isLogDisabled {
             learnedDays += 1
-            isLoggedToday = true
+            loggedDates.insert(today)
+            lastLoggedDate = Date()
         }
-    }
-    
-    func freezeDay() {
-        if !isFreezeDisabled  {
-            freezedDays += 1
-            usedFreezes += 1
-            isFreezedToday = true
-            freezedDates.insert(24)
-        }
-    }
-    func dayColor(for day: Int) -> Color {
-        if freezedDates.contains(day) { return Color.appCyan.opacity(day == 24 ? 1 : 0.25) }
-        if day == 24 { return Color.appOrange }
-        return day < 24 ? Color.appOrange.opacity(0.2) : Color.clear
-    }
     }
 
+    func checkStreak() {
+        guard let last = lastLoggedDate else { return }
+
+        let hours = Date().timeIntervalSince(last) / 3600
+
+        if hours > 32 {
+            learnedDays = 0
+        }
+    }
+
+    func updateGoal(text: String, duration: String) {
+        learningText = text
+        selectedDuration = duration
+        learnedDays = 0
+        freezedDays = 0
+        usedFreezes = 0
+        loggedDates = []
+        freezedDates = []
+        lastLoggedDate = nil
+        goalState = .inProgress
+    }
+
+    func freezeDay() {
+        if !isFreezeDisabled {
+            freezedDays += 1
+            usedFreezes += 1
+            freezedDates.insert(today)
+        }
+    }
+
+    // لون خلفية دائرة اليوم
+    func dayColor(for date: Date) -> Color {
+        if freezedDates.contains(date) {
+            return Color.appCyan.opacity(0.25)
+        }
+        if date == today {
+            return Color.appOrange
+        }
+        // مؤقت: الأيام الماضية برتقالية حتى نضيف الحفظ
+        return date < today ? Color.appOrange.opacity(0.2) : Color.clear
+    }
+
+    // لون رقم اليوم
+    func dayTextColor(for date: Date) -> Color {
+        if freezedDates.contains(date) {
+            return Color.appCyan
+        }
+        if date == today {
+            return Color.white
+        }
+        return date < today ? Color.appOrange : Color.white
+    }
+}

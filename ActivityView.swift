@@ -6,10 +6,6 @@ struct ActivityView: View {
 
     let letters = ["S", "M", "T", "W", "T", "F", "S"]
 
-    func dayLetter(for day: Int) -> String {
-        letters[day - 20]
-    }
-
     var body: some View {
         ZStack {
             Color.black
@@ -28,29 +24,34 @@ struct ActivityView: View {
                         .frame(width: 44, height: 44)
                         .background(Color.white.opacity(0.12))
                         .clipShape(Circle())
-                    Image(systemName: "scope")
-                        .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .background(Color.white.opacity(0.12))
-                        .clipShape(Circle())
+
+                    Button {
+                        showGoalScreen = true
+                    } label: {
+                        Image(systemName: "pencil.and.outline")
+                            .foregroundStyle(.white)
+                            .frame(width: 44, height: 44)
+                            .background(Color.white.opacity(0.12))
+                            .clipShape(Circle())
+                    }
                 }
 
-                Text("Thursday, 24 October")
+                Text(viewModel.todayText)
                     .font(.system(size: 15))
                     .foregroundStyle(Color.appGray)
 
                 HStack(spacing: 0) {
-                    ForEach(20...26, id: \.self) { day in
+                    ForEach(Array(viewModel.weekDays.enumerated()), id: \.offset) { index, date in
                         VStack(spacing: 6) {
-                            Text(dayLetter(for: day))
+                            Text(letters[index])
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundStyle(.white)
 
-                            Text("\(day)")
+                            Text("\(Calendar.current.component(.day, from: date))")
                                 .font(.system(size: 20))
-                                .foregroundStyle(day == 24 ? Color.white : (day < 24 ? (viewModel.freezedDates.contains(day) ? Color.appCyan : Color.appOrange) : Color.white))
+                                .foregroundStyle(viewModel.dayTextColor(for: date))
                                 .frame(width: 40, height: 40)
-                                .background(viewModel.dayColor(for: day))
+                                .background(viewModel.dayColor(for: date))
                                 .clipShape(Circle())
                         }
                         .frame(maxWidth: .infinity)
@@ -100,12 +101,12 @@ struct ActivityView: View {
                     } label: {
                         Text(viewModel.isLoggedToday ? "Logged as Learned" : "Log as Learned")
                             .font(.system(size: 17, weight: .semibold))
-                            .foregroundStyle(viewModel.isLoggedToday ? Color.appGray : Color.white)
+                            .foregroundStyle(viewModel.isLogDisabled ? Color.appGray : Color.white)
                             .frame(width: 272, height: 272)
-                            .background(viewModel.isLoggedToday ? Color.appCard : Color.appOrange)
+                            .background(viewModel.isLogDisabled ? Color.appCard : Color.appOrange)
                             .clipShape(Circle())
                     }
-                    .disabled(viewModel.isLoggedToday)
+                    .disabled(viewModel.isLogDisabled)
                     .frame(maxWidth: .infinity)
 
                     Spacer()
@@ -130,28 +131,21 @@ struct ActivityView: View {
                         .padding(.top, 8)
 
                 case .completed:
-                    GoalResultView(
-                        icon: "hands.clap.fill",
-                        title: "Well done!",
-                        subtitle: "Ready for your next goal?",
-                        onSetGoal: { showGoalScreen = true }
-                    )
+                    GoalResultView(status: .completed, onSetGoal: { showGoalScreen = true })
 
                 case .notMet:
-                    GoalResultView(
-                        icon: "star.fill",
-                        title: "You didn't reach your goal this time.",
-                        subtitle: "Want to set another goal?",
-                        onSetGoal: { showGoalScreen = true }
-                    )
+                    GoalResultView(status: .failed, onSetGoal: { showGoalScreen = true })
                 }
             }
             .padding(.horizontal, 17)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .onAppear {
+            viewModel.checkStreak()
+        }
         .sheet(isPresented: $showGoalScreen) {
             NavigationStack {
-                LearningGoalView()
+                LearningGoalView(viewModel: viewModel)
             }
         }
     }
