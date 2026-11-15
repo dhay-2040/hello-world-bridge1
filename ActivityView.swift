@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ActivityView: View {
     @StateObject private var viewModel = ActivityViewModel()
+    @State private var showGoalScreen = false
 
     let letters = ["S", "M", "T", "W", "T", "F", "S"]
 
@@ -132,19 +133,26 @@ struct ActivityView: View {
                     GoalResultView(
                         icon: "hands.clap.fill",
                         title: "Well done!",
-                        subtitle: "Ready for your next goal?"
+                        subtitle: "Ready for your next goal?",
+                        onSetGoal: { showGoalScreen = true }
                     )
 
                 case .notMet:
                     GoalResultView(
                         icon: "star.fill",
                         title: "You didn't reach your goal this time.",
-                        subtitle: "Want to set another goal?"
+                        subtitle: "Want to set another goal?",
+                        onSetGoal: { showGoalScreen = true }
                     )
                 }
             }
             .padding(.horizontal, 17)
             .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .sheet(isPresented: $showGoalScreen) {
+            NavigationStack {
+                LearningGoalView()
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ class ActivityViewModel: ObservableObject {
     @Published var isLoggedToday = false
     @Published var isFreezedToday = false
     @Published var usedFreezes = 0
+
     let maxFreezes = 2
     enum GoalState {
         case inProgress

@@ -4,6 +4,7 @@ struct GoalResultView: View {
     let icon: String
     let title: String
     let subtitle: String
+    let onSetGoal: () -> Void
     
     var body: some View {
         VStack(spacing: 8) {
@@ -23,8 +24,8 @@ struct GoalResultView: View {
                 .foregroundStyle(Color.appGray)
             
             Button {
-                
-            }label: {
+                onSetGoal()
+            } label: {
                 Text("Set a goal")
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundStyle(.white)
@@ -36,15 +37,15 @@ struct GoalResultView: View {
             .padding(.top, 24)
             
             Spacer()
-            }
-        .frame(maxWidth: .infinity)
         }
+        .frame(maxWidth: .infinity)
     }
+}
 
 #Preview {
     ZStack {
         Color.black.ignoresSafeArea()
-        GoalResultView(icon: "hands.clap.fill", title: "Well done!", subtitle: "Ready for your next goal?")
+        GoalResultView(icon: "hands.clap.fill", title: "Well done!", subtitle: "Ready for your next goal?", onSetGoal: {})
     }
 }
-    
+
