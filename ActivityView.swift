@@ -131,12 +131,11 @@ struct ActivityView: View {
         if viewModel.goalState == .inProgress {
             VStack(spacing: 10) {
                 Button { viewModel.freezeDay() } label: {
-                    Text("Freeze for a day")
+                    Text(viewModel.isFreezedToday ? "Freezed for a day" : "Freeze for a day")
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(viewModel.isFreezeDisabled ? Color.appGray.opacity(0.6) : Color.white)
                         .frame(width: mainWidth, height: 52)
-                        .background(Capsule().fill(Color.appCyan))
-                        .opacity(viewModel.isFreezeDisabled ? 0.4 : 1)
+                        .background(Capsule().fill(viewModel.isFreezeDisabled ? Color.appCard : Color.appCyan))
                 }
                 .disabled(viewModel.isFreezeDisabled)
 
