@@ -5,13 +5,14 @@ struct ContentView: View {
     @State private var hasStarted = false
 
     var body: some View {
-        if hasStarted {
-            ActivityView(viewModel: viewModel)
-        } else {
-            OnboardingView(viewModel: viewModel) {
-                hasStarted = true
+        Group {
+            if hasStarted {
+                ActivityView(viewModel: viewModel)
+            } else {
+                OnboardingView(viewModel: viewModel) { hasStarted = true }
             }
         }
+        .preferredColorScheme(.dark)
     }
 }
 

@@ -15,6 +15,9 @@ class ActivityViewModel: ObservableObject {
     enum GoalState { case inProgress, completed, notMet }
     @Published var goalState: GoalState = .inProgress
 
+    // Saved before logging, so Undo can restore it
+    private var lastActivityBeforeLog: Date? = nil
+
     var today: Date { Calendar.current.startOfDay(for: Date()) }
 
     var todayText: String {
@@ -61,9 +64,18 @@ class ActivityViewModel: ObservableObject {
 
     func logLearned() {
         guard !isLogDisabled else { return }
+        lastActivityBeforeLog = lastActivityDate
         learnedDays += 1
         loggedDates.insert(today)
         lastActivityDate = Date()
+    }
+
+    // Undo a log pressed by mistake (today only)
+    func undoLog() {
+        guard isLoggedToday else { return }
+        loggedDates.remove(today)
+        learnedDays = max(0, learnedDays - 1)
+        lastActivityDate = lastActivityBeforeLog
     }
 
     func freezeDay() {
@@ -108,6 +120,7 @@ class ActivityViewModel: ObservableObject {
         loggedDates = []
         freezedDates = []
         lastActivityDate = nil
+        lastActivityBeforeLog = nil
         goalStartDate = today
         goalState = .inProgress
     }

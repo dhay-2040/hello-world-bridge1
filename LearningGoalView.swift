@@ -8,6 +8,9 @@ struct LearningGoalView: View {
     @State private var selectedDuration: String
     @State private var showAlert = false
 
+    // Orange measured from the design
+    private let designOrange = Color(red: 230 / 255, green: 141 / 255, blue: 64 / 255)
+
     init(viewModel: ActivityViewModel) {
         self.viewModel = viewModel
         _learningText = State(initialValue: viewModel.learningText)
@@ -38,24 +41,15 @@ struct LearningGoalView: View {
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 17, weight: .semibold))
                                 .foregroundStyle(.white)
-                                .frame(width: 44, height: 44)
-                                .background(Color.white.opacity(0.12))
-                                .clipShape(Circle())
+                                .frame(width: 24, height: 24)
                         }
+                        .buttonStyle(.glass)
+                        .buttonBorderShape(.circle)
+                        .controlSize(.large)
 
                         Spacer()
 
-                        Button {
-                            showAlert = true
-                        } label: {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundStyle(canUpdate ? Color.white : Color.appGray)
-                                .frame(width: 44, height: 44)
-                                .background(canUpdate ? Color.appOrange : Color.white.opacity(0.12))
-                                .clipShape(Circle())
-                        }
-                        .disabled(!canUpdate)
+                        checkButton
                     }
                 }
                 .padding(.top, 8)
@@ -92,9 +86,9 @@ struct LearningGoalView: View {
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
-                                .background(Color.white.opacity(0.15))
-                                .clipShape(Capsule())
+                                .glassEffect(.regular.interactive(), in: Capsule())
                         }
+                        .buttonStyle(.plain)
 
                         Button {
                             viewModel.updateGoal(text: learningText, duration: selectedDuration)
@@ -106,20 +100,48 @@ struct LearningGoalView: View {
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
-                                .background(Color.appOrange)
-                                .clipShape(Capsule())
+                                .glassEffect(.regular.tint(designOrange).interactive(), in: Capsule())
                         }
+                        .buttonStyle(.plain)
                     }
                     .padding(.top, 8)
                 }
                 .padding(16)
                 .frame(width: 270)
-                .background(Color.appCard)
-                .clipShape(RoundedRectangle(cornerRadius: 24))
+                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
             }
         }
+        .preferredColorScheme(.dark)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
+    }
+
+    // ✓ button: orange glass when there is a change, dark glass otherwise
+    @ViewBuilder
+    private var checkButton: some View {
+        if canUpdate {
+            Button {
+                showAlert = true
+            } label: {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 44, height: 44)
+                    .glassEffect(.regular.tint(designOrange).interactive(), in: Circle())
+            }
+            .buttonStyle(.plain)
+        } else {
+            Button { } label: {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(Color.appGray)
+                    .frame(width: 24, height: 24)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .controlSize(.large)
+            .disabled(true)
+        }
     }
 }
 
@@ -127,4 +149,5 @@ struct LearningGoalView: View {
     NavigationStack {
         LearningGoalView(viewModel: ActivityViewModel())
     }
+    .preferredColorScheme(.dark)
 }

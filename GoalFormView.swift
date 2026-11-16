@@ -4,6 +4,9 @@ struct GoalFormView: View {
     @Binding var learningText: String
     @Binding var selectedDuration: String
 
+    // Orange measured from the design
+    private let designOrange = Color(red: 230 / 255, green: 141 / 255, blue: 64 / 255)
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("I want to learn")
@@ -26,17 +29,23 @@ struct GoalFormView: View {
 
             HStack(spacing: 12) {
                 ForEach(["Week", "Month", "Year"], id: \.self) { duration in
+                    let isSelected = selectedDuration == duration
                     Button {
                         selectedDuration = duration
                     } label: {
                         Text(duration)
                             .font(.system(size: 17))
-                            .foregroundStyle(selectedDuration == duration ? Color.white : Color.appGray)
+                            .foregroundStyle(isSelected ? Color.white : Color.appGray)
                             .padding(.horizontal, 20)
                             .padding(.vertical, 10)
-                            .background(selectedDuration == duration ? Color.appOrange : Color.white.opacity(0.12))
-                            .clipShape(Capsule())
+                            .glassEffect(
+                                isSelected
+                                    ? Glass.regular.tint(designOrange).interactive()
+                                    : Glass.regular.interactive(),
+                                in: Capsule()
+                            )
                     }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(.top, 8)
@@ -50,4 +59,5 @@ struct GoalFormView: View {
         GoalFormView(learningText: .constant(""), selectedDuration: .constant("Week"))
             .padding(17)
     }
+    .preferredColorScheme(.dark)
 }

@@ -7,6 +7,9 @@ struct OnboardingView: View {
     @State private var learningText = ""
     @State private var selectedDuration = "Week"
 
+    // Orange measured from the design
+    private let designOrange = Color(red: 230 / 255, green: 141 / 255, blue: 64 / 255)
+
     var canStart: Bool {
         !learningText.trimmingCharacters(in: .whitespaces).isEmpty
     }
@@ -55,17 +58,23 @@ struct OnboardingView: View {
 
                 HStack(spacing: 12) {
                     ForEach(["Week", "Month", "Year"], id: \.self) { duration in
+                        let isSelected = selectedDuration == duration
                         Button {
                             selectedDuration = duration
                         } label: {
                             Text(duration)
                                 .font(.system(size: 17))
-                                .foregroundStyle(selectedDuration == duration ? .white : Color.gray)
+                                .foregroundStyle(isSelected ? Color.white : Color.gray)
                                 .padding(.horizontal, 20)
                                 .padding(.vertical, 10)
-                                .background(selectedDuration == duration ? Color.appOrange : Color.white.opacity(0.12))
-                                .clipShape(Capsule())
+                                .glassEffect(
+                                    isSelected
+                                        ? Glass.regular.tint(designOrange).interactive()
+                                        : Glass.regular.interactive(),
+                                    in: Capsule()
+                                )
                         }
+                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.top, 8)
@@ -81,14 +90,18 @@ struct OnboardingView: View {
                 } label: {
                     Text("Start Learning")
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 32)
-                        .padding(.vertical, 14)
-                        .background(Color.appOrange)
-                        .clipShape(Capsule())
+                        .foregroundStyle(canStart ? Color.white : Color.gray)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 11)
+                        .glassEffect(
+                            canStart
+                                ? Glass.regular.tint(designOrange).interactive()
+                                : Glass.regular,
+                            in: Capsule()
+                        )
                 }
+                .buttonStyle(.plain)
                 .disabled(!canStart)
-                .opacity(canStart ? 1 : 0.5)
                 .frame(maxWidth: .infinity)
 
                 Text("You can edit your desire later")
@@ -100,9 +113,11 @@ struct OnboardingView: View {
             .padding(.horizontal, 17)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .preferredColorScheme(.dark)
     }
 }
 
 #Preview {
     OnboardingView(viewModel: ActivityViewModel(), onStart: {})
+        .preferredColorScheme(.dark)
 }
