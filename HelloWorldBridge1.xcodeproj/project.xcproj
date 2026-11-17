@@ -14,6 +14,7 @@
     { "kind": "folder", "path": "HelloWorldBridge1", "target-membership": [ "HelloWorldBridge1" ] },
     { "path": "Colors.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
     { "path": "OnboardingView.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
+    { "path": "LJ_Icon.icon", "target-membership": [ "HelloWorldBridge1/resources" ] },
     { "path": "ActivityView.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
     { "path": "ActivityViewModel.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
     { "path": "GoalResultView.swift", "target-membership": [ "HelloWorldBridge1/compile-sources" ] },
@@ -40,8 +41,8 @@
         "resources",
       ],
       "build-settings": {
-        "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
-        "ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS": "YES",
+        "ASSETCATALOG_COMPILER_APPICON_NAME": "LJ_Icon",
+        "ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS": "NO",
         "CODE_SIGN_STYLE": "Automatic",
         "CURRENT_PROJECT_VERSION": "1",
         "ENABLE_APP_SANDBOX": "YES",
